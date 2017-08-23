@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>Anthony DeSouza - Articles</title>
+      <description>A personal blog with a focus of data science, machine learning, and other software experiments</description>
+      <link>
+      https://desouza.li</link>
+    <item>
+      <title>Optimization Using Genetic Algorithms</title>
+      <description>&lt;p&gt;Whether it’s minimizing manufacturing costs, finding the &lt;a href=&quot;https://en.wikipedia.org/wiki/Travelling_salesman_problem&quot;&gt;shortest path around a city&lt;/a&gt;, or finding an optimal airfoil design, optimization problems are everywhere. An &lt;strong&gt;optimization problem&lt;/strong&gt;, simply put, is the problem of finding the &lt;em&gt;best&lt;/em&gt; solution from all feasible solutions.&lt;/p&gt;
+      </description>
+      <pubDate>Thu, 29 Jun 2017 04:30:00 -0400</pubDate>
+      <link>
+      https://desouza.li/genetic-algorithms</link>
+    <guid isPermaLink="true">https://desouza.li/genetic-algorithms</guid>
+  </item>
+  <item>
+    <title>Minifying Jekyll Content on a Shared Host</title>
+    <description>&lt;p&gt;I love &lt;a href=&quot;http://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt;. It makes it super simple for me to create the content for this site. All I have to do is open up a text file and start typing. When I’m done, it’s just a simple &lt;code class=&quot;highlighter-rouge&quot;&gt;git push&lt;/code&gt; away from the web where it’s formatted and compiled into static files.&lt;/p&gt;
+    </description>
+    <pubDate>Mon, 23 Mar 2015 11:00:00 -0400</pubDate>
+    <link>
+    https://desouza.li/jekyll-minify-on-shared-hosting</link>
+  <guid isPermaLink="true">https://desouza.li/jekyll-minify-on-shared-hosting</guid>
+</item>
+<item>
+  <title>Pentax Firmware Decrypting in the Web</title>
+  <description>&lt;p&gt;A couple of years ago, I purchased my first DSLR: the Pentax K-30. Photography has been my hobby ever since, and I’m always looking for cool new things to push my camera further. The one thing that I really miss from my previous Canon point-and-shoot is unsurprisingly, the &lt;a href=&quot;http://chdk.wikia.com/wiki/CHDK&quot;&gt;Canon Hack Development Kit (CHDK)&lt;/a&gt;. Luckily, most of the features that make it so useful, such as RAW image capture, live histogram, and the intervalometer are already present in the K-30. I’m not missing out on much.&lt;/p&gt;
+  </description>
+  <pubDate>Fri, 09 Jan 2015 18:40:00 -0500</pubDate>
+  <link>
+  https://desouza.li/pfwtool_html</link>
+<guid isPermaLink="true">https://desouza.li/pfwtool_html</guid>
+</item>
+</channel>
+</rss>

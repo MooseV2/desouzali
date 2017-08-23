@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Boat test</title>
+  <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.5.0/fabric.min.js"></script>
+</head>
+<body>
+<canvas id="canvas" width="500" height="600"></canvas>
+
+<script>
+class Boat {
+  constructor() {
+    this.paddlePosition = [0,0];
+    this.paddleRotation = [0,0];
+    this.paddleSpeed = [5,5];
+    this.speed = 0;
+    this.position = {x: 100, y: canvas.height/2};
+    this.rotation = 0;
+    this.cycle = 0;
+  }
+
+  draw() {
+    this.paddleRotation[0] = (this.paddleRotation[0] + this.paddleSpeed[0]) % 360;
+    if (Math.abs(this.paddleRotation[0]) < 120) {
+      this.rotation -= 0.25;
+      this.speed += 0.25;
+    }
+
+    this.paddleRotation[1] = (this.paddleRotation[1] + this.paddleSpeed[1]) % 360;
+    if (Math.abs(this.paddleRotation[1]) < 120) {
+      this.rotation += 0.25;
+      this.speed += 0.25;
+    }
+
+    this.speed *= 0.98;
+    this.position.x += Math.cos(this.rotation * Math.PI/180) * this.speed;
+    this.position.y += Math.sin(this.rotation * Math.PI/180) * this.speed;
+    
+    
+    //Boat
+    drawRotated(boatImage,
+     this.rotation,
+     this.position,
+     {x: -boatImage.width/2, y: -boatImage.height/2})
+
+    // Left paddle
+    drawRotated(paddleImage,
+      this.rotation + 270 - 45 * Math.sin(this.paddleRotation[0] * Math.PI/180),
+      {x: this.position.x + Math.cos(this.rotation * Math.PI/180) * this.paddlePosition[0],
+       y: this.position.y + Math.sin(this.rotation * Math.PI/180) * this.paddlePosition[0]},
+      {x: 0, y: -paddleImage.height/2});
+
+    // Right paddle
+    drawRotated(paddleImage,
+      this.rotation + 90 + 45 * Math.sin(this.paddleRotation[1] * Math.PI/180),
+      {x: this.position.x + Math.cos(this.rotation * Math.PI/180) * this.paddlePosition[1],
+       y: this.position.y + Math.sin(this.rotation * Math.PI/180) * this.paddlePosition[1]},
+      {x: 0, y: -paddleImage.height/2});
+  }
+}
+
+var requestAnimationFrame = window.requestAnimationFrame || 
+                            window.mozRequestAnimationFrame || 
+                            window.webkitRequestAnimationFrame || 
+                            window.msRequestAnimationFrame;
+
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var boatImage = new Image;
+boatImage.src = "BOAT.png";
+
+var paddleImage = new Image;
+paddleImage.src = "paddle.png";
+var rot = 0;
+var counter = 0;
+
+var b = new Boat();
+
+function animation() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  b.draw();
+  requestAnimationFrame(animation);
+}
+
+function drawRotated(image, angle, position, origin) {
+  ctx.save();
+  ctx.translate(position.x, position.y);
+  ctx.rotate(angle * Math.PI/180);
+  ctx.drawImage(image, origin.x, origin.y);
+  ctx.restore();
+}
+
+animation();
+
+
+
+
+
+
+
+// fabric.Image.fromURL("BOAT.png", function(img) {
+//   var boat = img.scale(1).set({left: 0, top: 0});
+
+//   fabric.Image.fromURL("paddle.png", function(img) {
+//     var leftPaddle = img.scale(0.4).set(
+//       {
+//         left: 100,
+//         top: 65,
+//         aCoords: {x: 0, y: 15},
+//         angle: 45
+//       });
+//     var rightPaddle = fabric.util.object.clone(img)
+//     rightPaddle.scale(0.4).set(
+//       {
+//         left: 90,
+//         top: 5,
+//         aCoords: {x: 0, y: 15},
+//         angle: -45
+//       });
+    
+    
+//     canvas.add(new fabric.Group([boat, leftPaddle, rightPaddle]));
+//   })
+// })
+
+
+</script>
+
+</body>
+</html>

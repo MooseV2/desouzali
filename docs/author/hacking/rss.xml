@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>desouza.li</title>
+      <link>https://desouza.li</link>
+    <description>A personal blog with a focus of data science, machine learning, and other software experiments</description>
+    <language>en-us</language>
+    <managingEditor> Anthony DeSouza</managingEditor>
+    <atom:link href="rss" rel="self" type="application/rss+xml" />
+      <item>
+        <title>Pentax Firmware Decrypting in the Web</title>
+        <link>//pfwtool_html</link>
+      <author>Anthony DeSouza</author>
+      <pubDate>2015-01-09T18:40:00-05:00</pubDate>
+      <guid>//pfwtool_html</guid>
+      <description><![CDATA[
+	     <p>A couple of years ago, I purchased my first DSLR: the Pentax K-30. Photography has been my hobby ever since, and I’m always looking for cool new things to push my camera further. The one thing that I really miss from my previous Canon point-and-shoot is unsurprisingly, the <a href="http://chdk.wikia.com/wiki/CHDK">Canon Hack Development Kit (CHDK)</a>. Luckily, most of the features that make it so useful, such as RAW image capture, live histogram, and the intervalometer are already present in the K-30. I’m not missing out on much.</p>
+      <p>But I can’t resist the urge to fantasize over a programmable DSLR. So when <em>Pentax Forums</em> user <em>Shodan</em> announced he had started working on the <a href="http://www.pentaxforums.com/forums/6-pentax-dslr-discussion/250555-resurrecting-pentax-firmware-hacking.html"><em><strong>Pentax</strong> Hack Development Kit (PHDK)</em></a>, I knew I had to be a part of it.</p>
+      <p>The first step to hacking the firmware is decrypting it. <em>Svenpeter</em> made a tool called <a href="http://github.com/svenpeter42/pfwtool">pfwtool</a> which does an excellent job of decrypting the firmware. However, I was curious as to seeing if that functionality could be done via HTML5. My favourite file host, <a href="http://mega.co.nz">MEGA</a> uses JavaScript for on-the-fly decryption, so why couldn’t I? As it turns out, it was a lot easier than I thought it would be.</p>
+      <p>The web app is based off of svenpeter’s awesome code. I ported it all to JavaScript and built a simple GUI that let me leverage the new file API in HTML5 to decrypt the file and spit it back out <strong>without</strong> uploading it. That’s right – everything happens client side. It’s really nifty and if you’re interested in seeing how it works, feel free to examine the <a href="http://github.com/MooseV2/pfwtool_html">GitHub</a> repository.</p>
+      <p>Follow these simple steps to give it a try:</p>
+      <ol>
+        <li><a href="http://www.ricoh-imaging.co.jp/english/support/digital/firmware/k30v105.zip">Download</a> the Pentax K-30 firmware (v 1.05) from Ricoh-Imaging.</li>
+        <li>Open the <a href="/projects/pfwtool_html">Pentax Firmware Decrypter</a> in Google Chrome. Other browsers may have problems.</li>
+        <li>Drag the firmware file named <strong>fwdc215b.bin</strong> into the web page.</li>
+        <li>In a couple seconds, you will have a file appear in your downloads folder named <strong>decrypted-fwdc215b.bin</strong>.</li>
+        <li>Verify that it has the md5 checksum of <strong>0afe2524251009b97639316edfe1c410</strong>.</li>
+      </ol>
+      <p><strong>That’s it! Have fun with the PHDK</strong></p>
+      ]]></description>
+  </item>
+</channel>
+</rss>

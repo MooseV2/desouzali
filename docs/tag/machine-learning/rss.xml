@@ -1,0 +1,1085 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>desouza.li</title>
+      <link>https://desouza.li</link>
+    <description>A personal blog with a focus of data science, machine learning, and other software experiments</description>
+    <language>en-us</language>
+    <managingEditor> Anthony DeSouza</managingEditor>
+    <atom:link href="rss" rel="self" type="application/rss+xml" />
+      <item>
+        <title>Optimization Using Genetic Algorithms</title>
+        <link>//genetic-algorithms</link>
+      <author>Anthony DeSouza</author>
+      <pubDate>2017-06-29T04:30:00-04:00</pubDate>
+      <guid>//genetic-algorithms</guid>
+      <description><![CDATA[
+	     <p>Whether it’s minimizing manufacturing costs, finding the <a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem">shortest path around a city</a>, or finding an optimal airfoil design, optimization problems are everywhere. An <strong>optimization problem</strong>, simply put, is the problem of finding the <em>best</em> solution from all feasible solutions.</p>
+      <p>But how would you determine the best solution? <em>That</em> is the million dollar question. Suppose you were tasked with creating a box to hold liquid. The requirements state that the <strong>area</strong> must be at least <strong>16m<sup>2</sup></strong> and every meter of material used in the <strong>perimeter</strong> costs <strong>$2.00</strong>. What’s the cheapest box you can build?</p>
+      <form id="formBoxOptim">
+        <fieldset>
+          <legend>Box optimization</legend>
+          <em>Drag the box corners to resize</em>
+          <canvas id="canvasBoxOptim" width="100%" height="250px"></canvas>
+          <table>
+            <tr>
+              <td><label>Box Length</label></td>
+              <td><input type="text" name="boxLength" disabled="true" size="6" /></td>
+            </tr>
+            <tr>
+              <td><label>Box Width</label></td>
+              <td><input type="text" name="boxWidth" disabled="true" size="6" /></td>
+            </tr>
+            <tr>
+              <td><label>Area (\( L \times W \))</label></td>
+              <td><input type="text" name="boxArea" disabled="true" size="6" /></td>
+            </tr>
+            <tr>
+              <td><label>Perimeter (\( 2L + 2W \))</label></td>
+              <td><input type="text" name="boxPerimeter" disabled="true" size="6" /></td>
+            </tr>
+            <tr>
+              <td><label>Cost (\( \$2.00 \times Perimeter \))</label></td>
+              <td><input type="text" name="boxCost" disabled="true" size="6" /></td>
+            </tr>
+          </table>
+        </fieldset>
+        <script>
+          function updateBox(e) {
+            var box = e.target || e;
+            var length = Math.round(box.getWidth() / 200 * 4)
+            var width = Math.round(box.getHeight() / 200 * 4)
+            var area = length * width;
+            var perimeter = 2 * length + 2 * width;
+            var cost = 2 * perimeter;
+            var form = document.getElementById("formBoxOptim").elements;
+            form["boxLength"].value = length;
+            form["boxWidth"].value = width;
+            form["boxArea"].value = area;
+            form["boxPerimeter"].value = length;
+            form["boxCost"].value = "$" + cost + ".00";
+          
+            form["boxArea"].style.backgroundColor = area < 16 ? "#f7cac5" : "#c1f4d7"
+          }
+          
+          var canvas = new fabric.Canvas("canvasBoxOptim");
+          canvas.setWidth(document.getElementById("formBoxOptim").offsetWidth);
+          canvas.calcOffset();
+          canvas.uniScaleTransform = true;
+          var rect = new fabric.Rect({
+            left: 20,
+            top: 20,
+            fill: 'red',
+            width: 200,
+            height: 100,
+            transparentCorners: false
+          });
+          rect.setControlVisible("mtr", false);
+          canvas.add(rect).setActiveObject(rect);
+          canvas.on('object:scaling', updateBox);
+          updateBox(rect);
+        </script>
+      </form>
+      <p><br />
+      </p>
+      <p>This problem is simple to solve mathematically. Working backwards from the required area of 16m<sup>2</sup>, we start by setting \(16=L \cdot W \) or \(L = \frac{16}{W} \) and substitute that into the equation for the perimeter:
+        \[
+        \begin{align}
+        P &amp;= 2W - 2\cdot(16\div W) \\
+        &amp;= W - 16\div W \\
+        &amp;= W^{2} - 16 \\
+        W &amp;= 4 \\
+        L &amp;= W = 4
+        \end{align}
+        \]</p>
+      <p><strong>Solution:</strong> The cheapest box with an area of 16m<sup>2</sup> is 4 x 4m and costs $32.00.</p>
+      <p>Gradeschool level math is sufficient in solving equations with simple relationships and few variables, but what about more complex problems?</p>
+      <h2 id="enter-genetics">Enter Genetics</h2>
+      <p>It turns out that life on Earth is incredibly complex. <em>Trillions</em> of living cells interact every day to make up the body known as <em>you</em>. From a strictly biological point of view, life is a game where the objective is to stay on Earth as long as possible. The cells in your body can’t keep this up forever, so the only possible way to prevent your own extinction is by duplicating the important parts of your own existence and making … a <em>new</em> version of you. This, of course, is called <em>reproduction</em>.</p>
+      <p>Not every living creature makes the cut. Some are killed early – by hunting, disease, or starvation. Some just can’t find a suitable partner. If you’re an African impala and constantly being hunted by carnivourous predators, there’s no guarantee that you’ll live long enough to ensure your spot in the gene pool.</p>
+      <p><img src="/assets/images/impala.jpg" alt="An impala grazing in a field" style="width: 110%;" /></p>
+      <p>But if you <em>did</em> have to outrun a lion, might your odds be <em>slightly</em> more favourable if you could run just a <em>little</em> bit faster, jump a <em>little</em> bit higher, and see a <em>little</em> bit farther? Over time, the less fortunate impalas would be killed off, leaving the faster impalas to reproduce and pass on their “code”.</p>
+      <p>This “code” is found in every living organism in a special chemical called DNA, and among other things is responsible for tweaking the aforementioned variables.</p>
+      <p>Unlike computer code, a scientist looking at DNA would see a string of millions (or billions) of “bases” in the form of <strong>A</strong>, <strong>C</strong>, <strong>G</strong>, and <strong>T</strong>, representing the fundamental base chemicals of DNA. The code is divided into discrete sections called <strong>chromosomes</strong>, with two chromosomes forming a double-helix pair. Each chromosome affects the organism differently. For example, in humans (who have 23 pairs of chromosomes), the 23rd pair determines gender. Let’s look at what a chromosome may look like:</p>
+      <blockquote>
+        <p>… ACAAGATGCCATTGTCCCCCGGCCTCCTGCTGCTGCTGCTCTCCGGGGCCACGGCCACCGCTGCCCTGCCCCTGGAGGGTGGCCCCACCGGCCGAGACAGCGAGCATATGCAGGAAG …</p>
+      </blockquote>
+      <p>Despite looking nonsensical, scientists have discovered that certain functional groups of code at certain locations are responsible for the biological traits found in the organism. These groups are called <strong>genes</strong>.</p>
+      <blockquote>
+        <p>… CC<strong><mark class="red">ATGCCTAA</mark></strong>GCCCC<strong><mark class="blue">ATGACATGA</mark></strong>AACG …</p>
+      </blockquote>
+      <p>The highlighted sequences above represent the genes responsible for trait <em>X</em> and trait <em>Y</em> in the organism. Let explore how changing these (hypothetical) codes would have an effect on our impala:</p>
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align: center">Location</th>
+            <th>Gene</th>
+            <th>Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align: center"><mark class="red">Red</mark></td>
+            <td>ATG<strong>CC</strong>TAA</td>
+            <td>Runs slower</td>
+          </tr>
+          <tr>
+            <td style="text-align: center"><mark class="red">Red</mark></td>
+            <td>ATG<strong>CA</strong>TAA</td>
+            <td>Runs faster</td>
+          </tr>
+          <tr>
+            <td style="text-align: center"><mark class="blue">Blue</mark></td>
+            <td>ATG<strong>ACA</strong>TGA</td>
+            <td>Jumps higher</td>
+          </tr>
+          <tr>
+            <td style="text-align: center"><mark class="blue">Blue</mark></td>
+            <td>ATG<strong>GGG</strong>TGA</td>
+            <td>Jumps lower</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>The perfect impala would have <em>both</em> beneficial traits (running faster <em>and</em> jumping higher) and would be more likely to out-compete the impala who drew both short sticks, running slower and jumping lower.</p>
+      <p>I hope the concept of natural selection is becoming evident: despite the randomness of genetics, better traits are more likely to stay in the gene pool and worse traits are more likely to be killed off.</p>
+      <p>Here’s where it gets interesting: we can simulate the process of natural selection in a computer model to optimize any solution.</p>
+      <h2 id="the-infinite-monkey-theorem">The Infinite Monkey Theorem</h2>
+      <blockquote>
+        <p>A monkey hitting keys at random on a typewriter keyboard for an infinite amount of time will almost surely type the complete works of William Shakespeare.</p>
+        <p>– <a href="https://en.wikipedia.org/wiki/Infinite_monkey_theorem">Infinite Monkey Theorem - Wikipedia</a></p>
+      </blockquote>
+      <p>How difficult would it be to type a given text completely randomly? Is that even possible?</p>
+      <p>Suppose there are 50 keys on a typewriter, and each of those keys have an equal 1/50 probability of being pressed. The probability of typing the word “Hello” is as follows:</p>
+      <script type="math/tex; mode=display">
+        \underbrace{(1/50)}_{\text{H}}\times
+        \underbrace{(1/50)}_{\text{e}}\times
+        \underbrace{(1/50)}_{\text{l}}\times
+        \underbrace{(1/50)}_{\text{l}}\times
+        \underbrace{(1/50)}_{\text{o}} = \frac{1}{312,500,000}
+      </script>
+      <p>Yikes! That’s a one in over 300 <em>million</em> chance to get a simple five letter word! And “Hello World”? Even typing eleven new letters every second since the <strong>beginning of the universe</strong> wouldn’t guarantee success.</p>
+      <p>Let’s try a different approach; one inspired by genetics.</p>
+      <h2 id="implementing-a-genetic-algorithm">Implementing a Genetic Algorithm</h2>
+      <blockquote>
+        <p>The brush must draw by itself. 
+          – <a href="https://en.wikipedia.org/wiki/Alan_Watts">Alan Watts</a></p>
+      </blockquote>
+      <p>Let’s recreate this quotation. To simulate natural selection, we’re going to take the following steps:</p>
+      <ol>
+        <li>Create an initial population</li>
+        <li>Calculate fitness</li>
+        <li>Select best individuals</li>
+        <li>Crossover or mutate the genes</li>
+        <li>Repeat until successful</li>
+      </ol>
+      <script type="text/javascript">
+        function toggleCode(e) {
+          var checkbox = e.target;
+          codeblocks = document.querySelectorAll('.dragons');
+              codeblocks.forEach(function(block) {
+                var classes = block.classList;
+                if (checkbox.checked) {
+                  classes.remove("hidden");
+                } else {
+                  classes.add("hidden");
+                }
+          });
+        }
+      </script>
+      <div class="panel panel-danger">
+        <div class="panel-heading">
+          <h3 class="panel-title">WARNING: Here be dragons!</h3>
+        </div>
+        <div class="panel-body">
+          <em>In this post, we'll look at the code that creates this example. If you're not interested in that, flip the toggle below to hide it.</em>
+          <br />
+          <br />
+          <div class="onoffswitch center">
+            <input type="checkbox" name="displayCode" class="onoffswitch-checkbox" id="myonoffswitch" onclick="toggleCode(event);" checked="" />
+            <label class="onoffswitch-label" for="myonoffswitch">
+              <span class="onoffswitch-inner"></span>
+              <span class="onoffswitch-switch"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <h3 id="creating-the-initial-population">Creating the initial population</h3>
+      <p>We’ll start by creating a population of 500 random strings with a length of 29 characters each (the length of our desired quotation). These strings represent a single <strong>chromosome</strong> in each individual.</p>
+      <div class="dragons">
+        <figure class="highlight">
+          <pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">choice</span>
+<span class="k">def</span> <span class="nf">get_initial_population</span><span class="p">(</span><span class="n">word_length</span><span class="p">,</span> <span class="n">pop_size</span><span class="p">):</span>
+  <span class="n">population</span> <span class="o">=</span> <span class="p">[]</span> <span class="c"># The empty population</span>
+  <span class="n">letters</span> <span class="o">=</span> <span class="s">"ABCDEFGHIJKLMNOPQRSTUVWXYZ "</span> <span class="c"># Letter A-Z, plus space.</span>
+  <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">population_size</span><span class="p">):</span> <span class="c"># Generate words for the population</span>
+    <span class="n">word</span> <span class="o">=</span> <span class="s">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">choice</span><span class="p">(</span><span class="n">letters</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">word_length</span><span class="p">))</span>
+    <span class="n">population</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">population</span></code></pre>
+        </figure>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align: center">Generated Chromosomes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="text-align: center">TRWLSSXFY KMUZLJMWGYVLDN UMCQ</td>
+          </tr>
+          <tr>
+            <td style="text-align: center">WVLMMZXZJVA LTDOHFZKVWTOTIZGR</td>
+          </tr>
+          <tr>
+            <td style="text-align: center">CUQTSYBCNUTBVAUGGDJGOXZSKAZTK</td>
+          </tr>
+          <tr>
+            <td style="text-align: center">NSZHRBYRXUJGTFQQQFYVBXPWXSOAZ</td>
+          </tr>
+          <tr>
+            <td style="text-align: center">QPRYUXLXRZSUIICWEBFK CGOR IBR</td>
+          </tr>
+          <tr>
+            <td style="text-align: center">ENLTWBNJXEBUOLMCGLVVUTIWGGEPM</td>
+          </tr>
+          <tr>
+            <td style="text-align: center">TNRIFHW KMTGZYTNFWPTWUKBARTGU</td>
+          </tr>
+          <tr>
+            <td style="text-align: center">NJYRKYMLHJOSMUMET IYXHM WCOWA</td>
+          </tr>
+          <tr>
+            <td style="text-align: center">KC IPQ TMEBQSMGUODVHJBPZWGLRK</td>
+          </tr>
+          <tr>
+            <td style="text-align: center">ISDVVEQYSVUBURPJAEEOCUXTPOXXA</td>
+          </tr>
+          <tr>
+            <td style="text-align: center"><em>490 more…</em></td>
+          </tr>
+        </tbody>
+      </table>
+      <h3 id="calculating-fitness">Calculating Fitness</h3>
+      <p>Those words don’t look anything like the quotation we’re trying to recreate. But exactly <em>how</em> dissimilar are they? We need a quantifiable metric that can tell us exactly how close our chromosome (that is, the string) is to the the quotation. This is called a <a href="https://en.wikipedia.org/wiki/Fitness_function"><strong>fitness function</strong></a>.</p>
+      <p>Fitness functions can come in many forms, but the general idea is that they’re given an <em>input</em> (that is, our string) and they <em>output</em> a number between 0 and 1 depending on how close our input is to the goal (with 1 being most optimal/perfect).</p>
+      <p>In this example, a fitness score can be determined by calculating how many characters are both the <em>correct letter</em> and in the <em>correct location</em>.</p>
+      <div class="dragons">
+        <figure class="highlight">
+          <pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">get_fitness</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+  <span class="n">fitness</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="n">goal</span> <span class="o">=</span> <span class="s">"THE BRUSH MUST DRAW BY ITSELF"</span> <span class="c"># Set goal</span>
+  <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">letter</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">letter</span> <span class="o">==</span> <span class="n">goal</span><span class="p">[</span><span class="n">position</span><span class="p">]:</span>
+      <span class="n">fitness</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c"># Add fitness if correct position/letter</span>
+  <span class="n">fitness</span> <span class="o">=</span> <span class="n">fitness</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span> <span class="c"># Determine percent correct</span>
+  <span class="k">return</span> <span class="n">fitness</span></code></pre>
+        </figure>
+      </div>
+      <pre style="font-size: 16pt">
+SPU<mark> </mark>FNXTFLIV<mark>S</mark><mark>T</mark>EQIDJH<mark>B</mark>L<mark> </mark>K<mark>T</mark>FUVU
+THE<mark> </mark>BRUSH MU<mark>S</mark><mark>T</mark> DRAW <mark>B</mark>Y<mark> </mark>I<mark>T</mark>SELF
+
+Fitness: 6/29 characters correct = 0.208
+</pre>
+      <p>The purpose of our genetic algorithm is to get the fitness score of a chromosome to 1.00. That is, <em>all</em> letters will be correct and in correct position.</p>
+      <h3 id="selecting-the-best">Selecting the best</h3>
+      <p>Now that we have a list of each member of the population and their respective fitness, we want to decide which ones should be selected to create the next generation.</p>
+      <p>One method to do this is called fitness proportionate or <a href="https://en.wikipedia.org/wiki/Fitness_proportionate_selection">Roulette Wheel Selection</a>. Imagine all the chromosomes are placed on a roulette wheel, with the size of their pie being their fitness (that is, less fit chromosomes will have smaller slices).</p>
+      <form>
+        <div class="well">
+          <legend>Roulette Wheel Selection</legend>
+          <canvas id="canvasRoulette" height="200"></canvas>
+        </div>
+      </form>
+      <script type="text/javascript">
+        pieData = {
+            datasets: [{
+                data: [0.1034, 0.0690, 0.0690, 0.0690, 0.0345, 0.0345],
+                backgroundColor: ['#f1c40f', '#d38737', '#cd7b3f', '#c76f47', '#c1634f', '#bc5757']
+        
+            }],
+            labels: ['QTASWKYET KHJTWJKJTMZYKWFBRTM', 'ZMAUBVTNXOCKTQTORQGCOSVYLXLBE', 'VXKVOMTRSB HU Z PUXRFPXIJSFPR', 'JMROSRQNNBEKVDTMKDYRHHLIFUOHK', 'QPRYUXLXRZSUIICWEBFK CGOR IBR', 'TNRIFHW KMTGZYTNFWPTWUKBARTGU'],
+        };
+        pieOptions = {
+          legend: {
+              display: false
+            },
+        }
+        
+        var myPieChart = new Chart("canvasRoulette",{
+            type: 'pie',
+            data: pieData,
+            options: pieOptions,
+        });
+      </script>
+      <p>The higher the fitness (yellow), the more likely the marble will select the chromosome. The lower the fitness (red), the less likely.</p>
+      <div class="dragons">
+        <p>To do this mathematically, we must:</p>
+        <ol>
+          <li>Sort the chromosomes in descending order by fitness</li>
+          <li>Determine the <strong>Sum</strong> of all fitnesses</li>
+          <li>Generate a random number between 0 and the <strong>Sum</strong></li>
+          <li>Starting at the top of the list, cumulatively add the fitnesses until the sum is greater than our random number. The chromosome in this position is our selection.</li>
+          <li>Repeat steps 3-5 for as many parents as we want.</li>
+        </ol>
+        <figure class="highlight">
+          <pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">uniform</span>
+<span class="s">"""
+Step 1. Sort
+"""</span>
+<span class="k">def</span> <span class="nf">sort_population</span><span class="p">(</span><span class="n">population</span><span class="p">):</span>
+  <span class="c"># Create tuple with `(chromosome, fitness)`</span>
+  <span class="n">population_fitness</span> <span class="o">=</span> <span class="p">[(</span><span class="n">word</span><span class="p">,</span> <span class="n">get_fitness</span><span class="p">(</span><span class="n">word</span><span class="p">))</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">population</span><span class="p">]</span>
+  <span class="n">sorted_population</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">population_fitness</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">sorted_population</span>
+<span class="s">"""
+Step 2. Sum
+"""</span>
+<span class="k">def</span> <span class="nf">get_total_fitness</span><span class="p">(</span><span class="n">population</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">sum</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">population</span><span class="p">))</span>
+<span class="s">"""
+Step 3-4. Select a chromosome from the roulette wheel.
+"""</span>
+<span class="k">def</span> <span class="nf">get_chromosome</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">total_fitness</span><span class="p">):</span>
+  <span class="n">random_val</span> <span class="o">=</span> <span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">total_fitness</span><span class="p">)</span>
+  <span class="n">cumulative_sum</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># Start at 0</span>
+  <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">fitness</span> <span class="ow">in</span> <span class="n">population</span><span class="p">:</span>
+    <span class="n">cumulative_sum</span> <span class="o">+=</span> <span class="n">fitness</span>
+    <span class="k">if</span> <span class="n">cumulative_sum</span> <span class="o">&gt;</span> <span class="n">random_val</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">word</span>
+<span class="s">"""
+Step 5. Select two parents
+"""</span>
+<span class="k">def</span> <span class="nf">get_parents</span><span class="p">(</span><span class="n">sorted_population</span><span class="p">,</span> <span class="n">total_fitness</span><span class="p">):</span>
+  <span class="n">parents</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_chromosome</span><span class="p">(</span><span class="n">sorted_population</span><span class="p">,</span> <span class="n">total_fitness</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+  <span class="k">return</span> <span class="n">parents</span></code></pre>
+        </figure>
+      </div>
+      <p>Let’s go ahead and select two parents using our roulette wheel selection.</p>
+      <pre style="font-size: 16pt">
+Parents:
+   NJYRKYML<mark>H</mark>JOSMUMET IYXHM WCOWA
+   ENLTWBNJXEB<mark>U</mark>OLMCGLVVUTIWGG<mark>E</mark>PM
+</pre>
+      <p>For convenience, I’ve highlighted the correct areas in the same fashion as the fitness step.</p>
+      <h3 id="crossover-and-mutation">Crossover and Mutation</h3>
+      <p>Modifying the chromosomes to create a fitter individual is the quintessential element of genetic algorithms. This is done by one of two methods:</p>
+      <p><strong>Crossover</strong>: Two parents chromosomes are split and recombined (either down the middle, at a random point, or at multiple points) to create a new chromosome.</p>
+      <pre style="font-size: 16pt">
+Crossover:
+   <mark class="blue">NJYRKYML<mark>H</mark>JOSMU</mark>MET IYXHM WCOWA
+ + ENLTWBNJXEB<mark>U</mark>OL<mark class="red">MCGLVVUTIWGG<mark>E</mark>PM</mark>
+ --------------------------------
+   <mark class="blue">NJYRKYML<mark>H</mark>JOSMU</mark><mark class="red">MCGLVVUTIWGG<mark>E</mark>PM</mark>
+</pre>
+      <p><strong>Mutation</strong>: A (typically random) change is made to the chromosome. This can be randomly adjusting (adding or subtracting) a value, swapping or changing the order of values, or randomly changing values.</p>
+      <pre style="font-size: 16pt">
+Mutation:
+   AABBCDEF --&gt; <mark>BBCC</mark>CDEF (adjustment)
+   AABBCDEF --&gt; <mark>CD</mark>BB<mark>AA</mark>EF (swapping)
+   AABBCDEF --&gt; AABB<mark>MPRZ</mark> (random change)
+</pre>
+      <p>Typically a combination of crossover and mutation is used with a ratio dependent on the problem being solved (for example, crossover with 10% chance of mutation).</p>
+      <div class="dragons">
+        <figure class="highlight">
+          <pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">crossover_chromosome</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+  <span class="n">crossover_point</span> <span class="o">=</span> <span class="n">randrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">))</span> <span class="c"># Choose a random point </span>
+  <span class="n">new_chromosome</span> <span class="o">=</span> <span class="n">A</span><span class="p">[:</span><span class="n">crossover_point</span><span class="p">]</span> <span class="o">+</span> <span class="n">B</span><span class="p">[</span><span class="n">crossover_point</span><span class="p">:]</span>
+  <span class="k">return</span> <span class="n">new_chromosome</span>
+
+<span class="k">def</span> <span class="nf">mutate_chromosome</span><span class="p">(</span><span class="n">chromosome</span><span class="p">):</span>
+  <span class="n">letters</span> <span class="o">=</span> <span class="s">"ABCDEFGHIJKLMNOPQRSTUVWXYZ "</span> <span class="c"># Letter A-Z, plus space.</span>
+  <span class="n">num_mutations</span> <span class="o">=</span> <span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+  <span class="n">chromosome</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chromosome</span><span class="p">)</span> <span class="c"># Convert to a list for mutation</span>
+  <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_mutations</span><span class="p">):</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chromosome</span><span class="p">))</span>
+    <span class="n">chromosome</span><span class="p">[</span><span class="n">position</span><span class="p">]</span> <span class="o">=</span> <span class="n">choice</span><span class="p">(</span><span class="n">letters</span><span class="p">)</span> <span class="c"># Select a new random letter</span>
+  <span class="k">return</span> <span class="s">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chromosome</span><span class="p">)</span> <span class="c"># Convert back to string</span></code></pre>
+        </figure>
+      </div>
+      <h3 id="putting-it-all-together">Putting it all together</h3>
+      <p>We can create populations and evaluate their members on fitness. We can select the best ones and use them to create new chromosomes from crossover and/or mutation. We have all the pieces we need to implement this algorithm. The last step is to repeat these continuously until we achieve our goal.</p>
+      <ol>
+        <li>Create an initial random population pool</li>
+        <li>Repeat the following steps until we’ve reached our max fitness goal:
+          <ol>
+            <li>Sort the current population pool by fitness</li>
+            <li>Create a new empty population pool and fill it by:
+              <ol>
+                <li>Selecting two parents using roulette wheel selection on the old pool</li>
+                <li>Crossover and/or mutate the parents to create a daughter</li>
+                <li>Add the daughter to the new pool</li>
+                <li>Repeat until the new pool is of desired size</li>
+              </ol>
+            </li>
+            <li>Delete the old pool and set the current pool to the new population</li>
+          </ol>
+        </li>
+      </ol>
+      <div class="dragons">
+        <figure class="highlight">
+          <pre><code class="language-python" data-lang="python"><span class="n">population_size</span> <span class="o">=</span> <span class="mi">500</span> <span class="c"># Number of chromosomes in our population</span>
+<span class="n">word_length</span> <span class="o">=</span> <span class="mi">29</span> <span class="c"># Length of each chromosome</span>
+<span class="n">population</span> <span class="o">=</span> <span class="n">get_initial_population</span><span class="p">(</span><span class="n">word_length</span><span class="p">,</span> <span class="n">population_size</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">generation</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">500</span><span class="p">):</span>
+  <span class="n">population</span> <span class="o">=</span> <span class="n">sort_population</span><span class="p">(</span><span class="n">population</span><span class="p">)</span> <span class="c"># Sort by fitness</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">"Gen </span><span class="si">%</span><span class="s">s: </span><span class="si">%</span><span class="s">s [</span><span class="si">%03</span><span class="s">f]"</span> <span class="o">%</span> <span class="p">(</span><span class="n">generation</span><span class="p">,</span> <span class="n">population</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">population</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+  <span class="k">if</span> <span class="n">population</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mf">1.00</span><span class="p">:</span> <span class="c"># Stop if we've reached our goal</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Finished after </span><span class="si">%</span><span class="s">s generations!"</span> <span class="o">%</span> <span class="p">(</span><span class="n">generation</span><span class="p">,</span> <span class="p">))</span>
+    <span class="k">break</span>
+  <span class="n">total_fitness</span> <span class="o">=</span> <span class="n">get_total_fitness</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+  <span class="n">new_population</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">population_size</span><span class="p">):</span>
+    <span class="n">parents</span> <span class="o">=</span> <span class="n">get_parents</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">total_fitness</span><span class="p">)</span> <span class="c"># Roulette Wheel Selection</span>
+    <span class="n">daughter</span> <span class="o">=</span> <span class="n">crossover_chromosome</span><span class="p">(</span><span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c"># Crossover</span>
+    <span class="k">if</span> <span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">85</span><span class="p">:</span> <span class="c"># 15% chance to mutate</span>
+      <span class="n">daughter</span> <span class="o">=</span> <span class="n">mutate_chromosome</span><span class="p">(</span><span class="n">daughter</span><span class="p">)</span>
+    <span class="n">new_population</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">daughter</span><span class="p">)</span> <span class="c"># Add the daughter to the pool</span>
+  <span class="n">population</span> <span class="o">=</span> <span class="n">new_population</span> <span class="c"># Replace the old pool with new population</span></code></pre>
+        </figure>
+      </div>
+      <h3 id="results">Results</h3>
+      <p>Below are the results of running the genetic algorithm using our implementation. It took less than a second to successfully converge on our goal, and did so after <em>only 88 generations</em>! Remember the brute-force method we discussed earlier? Even using every computer in the world to generate random strings for the remainder of the universe would likely not yield the results that we achieved.</p>
+      <div class="well scroll-y" style="max-height: 700px">
+        <p><em>Results of the Genetic Algorithm</em></p>
+        <table>
+          <thead>
+            <tr>
+              <th>Generation</th>
+              <th>Best Chromosome</th>
+              <th>Fitness</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0</td>
+              <td>TGP YMYWOKHKZJZRCKPHTZ AAEDLG</td>
+              <td>0.137931</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>LDX GHKGHOLPLTHRCKPHTZ AAEDLG</td>
+              <td>0.172414</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>KSEKOTHBCRXDSBGWRI XIYPISVESQ</td>
+              <td>0.206897</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>OWEEARCXHYOCRUQDGLFABO MGSALZ</td>
+              <td>0.275862</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>TWEEARCXHYOCRUQDGLFAOPOIXSQOY</td>
+              <td>0.241379</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>TSEKOTHBCRXDSBGWRI XIYPISSLFE</td>
+              <td>0.241379</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>T MZJRMMUCMDSDRJREWRNPNOBSEQG</td>
+              <td>0.275862</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>OWE ABUECHAMQUKGRAA MZK VSMLF</td>
+              <td>0.310345</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>T EEAPASI XDSBGNRI XIYXIJSFAF</td>
+              <td>0.344828</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>TXEEARCXHCXFHKRDRDN BYXIJSFAR</td>
+              <td>0.379310</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>TWEEPRVBHYOCRAUDRI OZYPISSALF</td>
+              <td>0.379310</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>I MZURUSHOMJD CYBAU JWAIPSELF</td>
+              <td>0.413793</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td>TXEEARCSI LRIA DREWOZYPISSALF</td>
+              <td>0.482759</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td>TWEHBBUSHCMJDPNFRQXGUYPISSALF</td>
+              <td>0.448276</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td>TWEHBBUSHOODSBUDRDNQNQOIPSELF</td>
+              <td>0.482759</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td>TWEHBBUSHOODSBUDRDNQNY AGSEXS</td>
+              <td>0.448276</td>
+            </tr>
+            <tr>
+              <td>16</td>
+              <td>T EEAPOSHJUFSTUDRI  RYAIPSELF</td>
+              <td>0.517241</td>
+            </tr>
+            <tr>
+              <td>17</td>
+              <td>OWECBJUSQ BKSTPDWPE RYAIPSELF</td>
+              <td>0.517241</td>
+            </tr>
+            <tr>
+              <td>18</td>
+              <td>TWEEPRVBS XDSP DREWQPYJIPSELF</td>
+              <td>0.517241</td>
+            </tr>
+            <tr>
+              <td>19</td>
+              <td>TXEEARCSI MBSTUDRI  RYAIPSELF</td>
+              <td>0.586207</td>
+            </tr>
+            <tr>
+              <td>20</td>
+              <td>TWEHBBUSHOMCRUQDRDN BYXIJSLLF</td>
+              <td>0.551724</td>
+            </tr>
+            <tr>
+              <td>21</td>
+              <td>TXEMBBUSHOMCRUQDRDN BYXIJSLLF</td>
+              <td>0.551724</td>
+            </tr>
+            <tr>
+              <td>22</td>
+              <td>TXEMBBUSHOMCRUQDRDN BYXIJSLLF</td>
+              <td>0.551724</td>
+            </tr>
+            <tr>
+              <td>23</td>
+              <td>T LHBBUSHJEUS FDREW BC IPSELF</td>
+              <td>0.620690</td>
+            </tr>
+            <tr>
+              <td>24</td>
+              <td>TWEZBBUSHOMCRUQDRDN BYXIJSLLF</td>
+              <td>0.551724</td>
+            </tr>
+            <tr>
+              <td>25</td>
+              <td>TWEHBBUSHCPCSBQDRDN BYXIJSLLF</td>
+              <td>0.551724</td>
+            </tr>
+            <tr>
+              <td>26</td>
+              <td>LOE ARUSHOOKSTPDJMU JYPIPSELF</td>
+              <td>0.551724</td>
+            </tr>
+            <tr>
+              <td>27</td>
+              <td>TEGHBBUSHXDUSAUDRDN BYVIPSELF</td>
+              <td>0.586207</td>
+            </tr>
+            <tr>
+              <td>28</td>
+              <td>THMJBBUSHCMUSSPDRIFFJG IYSELF</td>
+              <td>0.586207</td>
+            </tr>
+            <tr>
+              <td>29</td>
+              <td>TXEMBBUSHOMLNLEDREN BY IPSFLF</td>
+              <td>0.586207</td>
+            </tr>
+            <tr>
+              <td>30</td>
+              <td>THEEBRUSHPADNBODRAEQBYDIDLELF</td>
+              <td>0.586207</td>
+            </tr>
+            <tr>
+              <td>31</td>
+              <td>TSEGBBUSHCMUSMODRJUOBYDISSELF</td>
+              <td>0.620690</td>
+            </tr>
+            <tr>
+              <td>32</td>
+              <td>THEEBRUSHPADNBODRAEQBY IZCELF</td>
+              <td>0.620690</td>
+            </tr>
+            <tr>
+              <td>33</td>
+              <td>TWEHBVUSHCMJZTUDRIU JY IZSELF</td>
+              <td>0.620690</td>
+            </tr>
+            <tr>
+              <td>34</td>
+              <td>T EHBBUSH XCSTPDREE BYXIESELF</td>
+              <td>0.655172</td>
+            </tr>
+            <tr>
+              <td>35</td>
+              <td>THEEBRUSHOKUSTFDRIEOBY ISSXLF</td>
+              <td>0.689655</td>
+            </tr>
+            <tr>
+              <td>36</td>
+              <td>THEEBRUSHOKUS WDREEQBY ISSXLF</td>
+              <td>0.655172</td>
+            </tr>
+            <tr>
+              <td>37</td>
+              <td>TWEHKRUSH MFST DREWBTYWIXZELF</td>
+              <td>0.655172</td>
+            </tr>
+            <tr>
+              <td>38</td>
+              <td>TXECBNUSCCMUSTQDRBN BY ISSELF</td>
+              <td>0.689655</td>
+            </tr>
+            <tr>
+              <td>39</td>
+              <td>TSEGBRCSHCMDST DREWBSY IPSELF</td>
+              <td>0.689655</td>
+            </tr>
+            <tr>
+              <td>40</td>
+              <td>TSEGBRUSCCMUSTQDRBN BY IVSELF</td>
+              <td>0.724138</td>
+            </tr>
+            <tr>
+              <td>41</td>
+              <td>THEGBRUSCCMUSTQDRBN BY IVSELF</td>
+              <td>0.758621</td>
+            </tr>
+            <tr>
+              <td>42</td>
+              <td>TWEEBRUSH MFST DREWBZY IZSESF</td>
+              <td>0.724138</td>
+            </tr>
+            <tr>
+              <td>43</td>
+              <td>TWE GRUSHPMUSM DREW JYEIESELF</td>
+              <td>0.724138</td>
+            </tr>
+            <tr>
+              <td>44</td>
+              <td>TWEEBRUSH MFST DTDEQBY IESELF</td>
+              <td>0.724138</td>
+            </tr>
+            <tr>
+              <td>45</td>
+              <td>OHE KRUSH MFST DREWBZO IPSELF</td>
+              <td>0.724138</td>
+            </tr>
+            <tr>
+              <td>46</td>
+              <td>TWEEBRUSH MFST DREWBZ  IFSELF</td>
+              <td>0.724138</td>
+            </tr>
+            <tr>
+              <td>47</td>
+              <td>THZ BRUSH MUBTIDREW QY IPSELF</td>
+              <td>0.793103</td>
+            </tr>
+            <tr>
+              <td>48</td>
+              <td>THZ KRUSHCMFST DRBN BY IVSELF</td>
+              <td>0.758621</td>
+            </tr>
+            <tr>
+              <td>49</td>
+              <td>THLHBBUSH MFST DREN BY IVSELF</td>
+              <td>0.758621</td>
+            </tr>
+            <tr>
+              <td>50</td>
+              <td>NHE QRUSHPMUST DREE QY IZSELF</td>
+              <td>0.758621</td>
+            </tr>
+            <tr>
+              <td>51</td>
+              <td>THEEBRUSHCMFST DRAWRVY ISSGLF</td>
+              <td>0.758621</td>
+            </tr>
+            <tr>
+              <td>52</td>
+              <td>THEEBBUSHCMFST DRAWRVY IPSELF</td>
+              <td>0.758621</td>
+            </tr>
+            <tr>
+              <td>53</td>
+              <td>NHE ARUSHPMUST DRAN NO IPSELF</td>
+              <td>0.758621</td>
+            </tr>
+            <tr>
+              <td>54</td>
+              <td>NHE ARUSHPMUST DRAWRVY IPSELF</td>
+              <td>0.793103</td>
+            </tr>
+            <tr>
+              <td>55</td>
+              <td>NHE ARUSHPMUST DRAWRVY ISSELF</td>
+              <td>0.793103</td>
+            </tr>
+            <tr>
+              <td>56</td>
+              <td>THE ARUSHPMUST DRAWRVY ISSELF</td>
+              <td>0.827586</td>
+            </tr>
+            <tr>
+              <td>57</td>
+              <td>THEEBBUSHCMUST DRAWRVY ISSELF</td>
+              <td>0.793103</td>
+            </tr>
+            <tr>
+              <td>58</td>
+              <td>OHE KRUSH MFST DREWQBY IOSELF</td>
+              <td>0.793103</td>
+            </tr>
+            <tr>
+              <td>59</td>
+              <td>THEEURUSHCMUST DRAWRVY ISSELF</td>
+              <td>0.793103</td>
+            </tr>
+            <tr>
+              <td>60</td>
+              <td>T EHBBUSH MPST DRAWEBY ISSELF</td>
+              <td>0.793103</td>
+            </tr>
+            <tr>
+              <td>61</td>
+              <td>THEBBBUSH MPST DRAWEBY ISSELF</td>
+              <td>0.827586</td>
+            </tr>
+            <tr>
+              <td>62</td>
+              <td>OHZ BRUSH MNST DRAWEBY ISSELF</td>
+              <td>0.827586</td>
+            </tr>
+            <tr>
+              <td>63</td>
+              <td>THEBBRUSH MNST DRAWEBY ISSELF</td>
+              <td>0.862069</td>
+            </tr>
+            <tr>
+              <td>64</td>
+              <td>THEEBBUSH MUSM DRAW BY IRSHLF</td>
+              <td>0.827586</td>
+            </tr>
+            <tr>
+              <td>65</td>
+              <td>THE DRUSHPMUST DRAW BY IYSELF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>66</td>
+              <td>THE BRUSHSMUST DRDW BW ISSELF</td>
+              <td>0.862069</td>
+            </tr>
+            <tr>
+              <td>67</td>
+              <td>THE BRUSHXMUST DRAJ RY IOLELF</td>
+              <td>0.827586</td>
+            </tr>
+            <tr>
+              <td>68</td>
+              <td>OHE BRUSH MUSM DRAC DY ISSELF</td>
+              <td>0.827586</td>
+            </tr>
+            <tr>
+              <td>69</td>
+              <td>THZTBRUSH MUST DRAW BY IBSBLF</td>
+              <td>0.862069</td>
+            </tr>
+            <tr>
+              <td>70</td>
+              <td>THEEBBUSH MUST DRAJ BYDIXSELF</td>
+              <td>0.827586</td>
+            </tr>
+            <tr>
+              <td>71</td>
+              <td>THE BRUSH MUST DRAU BZNIJSELF</td>
+              <td>0.862069</td>
+            </tr>
+            <tr>
+              <td>72</td>
+              <td>THE BRGDH MUST DRAJ BY IPSELZ</td>
+              <td>0.827586</td>
+            </tr>
+            <tr>
+              <td>73</td>
+              <td>THE BRUSHMQUST DRAW BY ISSELF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>74</td>
+              <td>THE BRUSH MUST DRAJ BW ISSELF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>75</td>
+              <td>THE BRBSH MHST DRAW BY IBSELF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>76</td>
+              <td>THE BRBSH MHST DRAW BY ISSELF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>77</td>
+              <td>THE KRUSH MUST DRAJ BY ISSELF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>78</td>
+              <td>THEEBRUSH MUST DRAW BY IBSELF</td>
+              <td>0.931034</td>
+            </tr>
+            <tr>
+              <td>79</td>
+              <td>THE BRUSH MUST DRAJ DY ISSELF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>80</td>
+              <td>THEEBRUSH MUST DRAW BY IXSELF</td>
+              <td>0.931034</td>
+            </tr>
+            <tr>
+              <td>81</td>
+              <td>THE DRUSH MUST DRDW BY ISSELF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>82</td>
+              <td>THEEBRUSH MUST DRAW BY ILSETF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>83</td>
+              <td>THEBBRUSH MUST DRAW BY IUSERF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>84</td>
+              <td>THEEMRUSH MUST DRAW BY IUSELF</td>
+              <td>0.896552</td>
+            </tr>
+            <tr>
+              <td>85</td>
+              <td>THE BRUSH MUSTPDRAW BY IBSELF</td>
+              <td>0.931034</td>
+            </tr>
+            <tr>
+              <td>86</td>
+              <td>THE BRUSH MUSTPDRAW BY IBSELF</td>
+              <td>0.931034</td>
+            </tr>
+            <tr>
+              <td>87</td>
+              <td>THE BRUSH MUST DRAW BY IUSELF</td>
+              <td>0.965517</td>
+            </tr>
+            <tr>
+              <td>88</td>
+              <td>THE BRUSH MUST DRAW BY ITSELF</td>
+              <td>1.000000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>One last time, let’s go over the benefits of genetic algorithms:</p>
+      <ol>
+        <li>They’re inspired by the ingenuity of nature: the same process that created all of life.</li>
+        <li>They’re (relatively) easy to implement in little code.</li>
+        <li>They can easily be applied to a wide variety of problems.</li>
+        <li>They’re <em>significantly</em> more efficient than a brute-force approach.</li>
+      </ol>
+      <p>There are many more aspects to genetic algorithms that haven’t been covered. Future posts will introduce things such as elitism, encoding, and different selection methods.</p>
+      <p>Lastly, I leave you with a tool to play with the implementation we devised. Play around with the parameters: see how long a lengthly goal takes to succeed, or how a small population or low mutation rate will affect the evolution process. All the code (both the Python and JavaScript versions) are available through the links at the bottom of the page.</p>
+      <h3 id="play-with-it">Play with it</h3>
+      <form id="formGenAlg">
+        <fieldset>
+          <legend>Genetic Algorithm</legend>
+          <table>
+            <tr>
+              <td><label>Goal</label></td>
+              <td><input type="text" name="gaGoal" size="40" value="HELLO WORLD" /></td>
+            </tr>
+            <tr>
+              <td><label>Population Size</label></td>
+              <td><input type="text" name="gaPopSize" size="6" value="1000" /></td>
+            </tr>
+            <tr>
+              <td><label>Mutation Rate</label></td>
+              <td><input type="text" name="gaMutationRate" size="3" value="15" /><label> %</label></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><input type="button" onclick="runSim();" value="Run Genetic Algorithm" /></td>
+            </tr>
+          </table>
+          <div id="gaResultsScroll" class="well scroll-y" style="max-height: 500px">
+            <table>
+              <thead>
+                <tr>
+                  <td><strong>Generation</strong></td>
+                  <td><strong>Chromosome</strong></td>
+                  <td><strong>Fitness</strong></td>
+                </tr>
+              </thead>
+              <tbody id="gaResults">
+              </tbody>
+            </table>
+          </div>
+        </fieldset>
+      </form>
+      <script type="text/javascript">
+        table = document.getElementById("gaResults");
+        // Add cells to results table from array
+        function addToTable(cells) {
+          var fragment = document.createDocumentFragment();
+          var row = document.createElement("tr");
+        
+          for (var i = 0; i < cells.length; i++) {
+            var cell = document.createElement("td");
+            cell.appendChild(document.createTextNode(cells[i]));
+            row.appendChild(cell);
+          }
+          fragment.appendChild(row);
+          table.appendChild(fragment);
+        }
+        
+        // Clears entire results table
+        function clearTable() {
+          while (table.firstChild) {
+            table.removeChild(table.firstChild);
+          }
+        }
+        
+        
+        // Code style to reflect Python in example
+        
+        // Create initial population
+        function get_initial_population(word_length, pop_size, goal) {
+          var chromosome, letters;
+          var population = [];
+          letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ "; //A-Z and space
+          for (var i = 0; i < pop_size; i++) {
+            chromosome = "";
+            for(var j = 0; j < word_length; j++) {
+                chromosome += letters.charAt(Math.floor(Math.random() * letters.length));
+            }
+            population.push([chromosome, get_fitness(chromosome, goal)]);
+          }
+          return population;
+        }
+        
+        function get_fitness(chromosome, goal) {
+          var fitness = 0;
+          for (var i = 0; i < chromosome.length; i++) {
+            if (chromosome[i] === goal[i]) {
+              fitness++;
+            }
+          }
+          fitness = fitness / chromosome.length;
+          return fitness;
+        }
+        
+        function sort_population(population) {
+          return population.sort(function(a,b) { return b[1] - a[1]; });
+        }
+        
+        function get_total_fitness(population) {
+          return population.map(function(v) { return v[1]; })
+                           .reduce(function(a,b) { return a + b; });
+        }
+        
+        function get_chromosome(population, total_fitness) {
+          var random_val = Math.random() * total_fitness;
+          var cumulative_sum = 0;
+          for (var i = 0; i < population.length; i++) {
+            cumulative_sum += population[i][1];
+            if (cumulative_sum > random_val)
+              return population[i][0];
+          }
+        }
+        
+        function get_parents(population, total_fitness) {
+          var parents = [];
+          for (var i = 0; i < 2; i++) {
+            parents.push(get_chromosome(population, total_fitness));
+          }
+          return parents;
+        }
+        
+        function crossover_chromosome(A, B) {
+          var crossover_point = Math.floor(Math.random() * (A.length));
+          return A.slice(0, crossover_point + 1) + B.slice(crossover_point + 1, B.length);
+        }
+        
+        function mutate_chromosome(chromosome) {
+          letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ "; //A-Z and space
+          var num_mutations = Math.floor(Math.random() * 5);
+          while (num_mutations--) {
+            var position = Math.floor(Math.random() * chromosome.length);
+            chromosome[position] = letters.charAt(Math.floor(Math.random() * letters.length));
+          }
+          return chromosome;
+        }
+        
+        function spawnMonkeys(pop_size, goal, mutate_rate) {
+          goal = goal.toUpperCase();
+          var word_length = goal.length;
+          var population = get_initial_population(word_length, pop_size, goal);
+        
+          for (var generation = 0; generation < 1000; generation++) {
+            population = sort_population(population);
+            addToTable([generation, population[0][0], population[0][1].toFixed(4)]);
+            if (population[0][1] === 1.00) {
+              table.appendChild(document.createTextNode("Finished after " + generation.toString() + " generations."));
+              break;
+            }
+            var total_fitness = get_total_fitness(population);
+            var new_population = [];
+            for (i = 0; i < pop_size; i++) {
+              var parents = get_parents(population, total_fitness);
+              var daughter = crossover_chromosome(parents[0], parents[1]);
+              if (Math.random() * 100 > (100 - mutate_rate)) {
+                daughter = mutate_chromosome(daughter);
+              }
+              new_population.push([daughter, get_fitness(daughter, goal)]);
+            }
+            population = new_population;
+          }
+        }
+        
+        function runSim() {
+          clearTable();
+          form = document.getElementById("formGenAlg").elements;
+          var goal = form["gaGoal"].value;
+          var pop_size = form["gaPopSize"].value;
+          var mutate_rate = Math.min(100, Math.max(0, form["gaMutationRate"].value));
+          spawnMonkeys(pop_size, goal, mutate_rate);
+          var scrollDiv = document.getElementById("gaResultsScroll");
+          scrollDiv.scrollTop = scrollDiv.scrollHeight;
+        }
+      </script>
+      <h3 id="source-code">Source code</h3>
+      <p>Available in the near future. Check back soon!</p>
+      ]]></description>
+  </item>
+</channel>
+</rss>

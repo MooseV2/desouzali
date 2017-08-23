@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- [[! Document Settings ]] -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- [[! Page Meta ]] -->
+    <title>Pentax Firmware Decrypting in the Web</title>
+    <meta name="description" content="Anthony DeSouza - A personal blog with a focus of data science, machine learning, and other software experiments" />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/assets/images/favicon.ico" >
+    <!-- [[! Styles'n'Scripts ]] -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css" />
+    <link rel="stylesheet" type="text/css"
+          href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic|Open+Sans:700,400" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/syntax.css" />
+    <!-- [[! highlight.js ]] -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/default.min.css">
+    <style>
+      .hljs { background: none; }
+    </style>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script>
+    <script>
+      hljs.initHighlightingOnLoad();
+    </script>
+    <!-- [[! Ghost outputs important style and meta data with this tag ]] -->
+    <link rel="canonical" href="/" />
+    <meta name="referrer" content="origin" />
+    <link rel="next" href="/page2/" />
+    <meta property="og:site_name" content="Anthony DeSouza" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Anthony DeSouza" />
+    <meta property="og:description" content="A personal blog with a focus of data science, machine learning, and other software experiments" />
+    <meta property="og:url" content="/" />
+    <meta property="og:image" content="/assets/images/cover1.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Anthony DeSouza" />
+    <meta name="twitter:description" content="A personal blog with a focus of data science, machine learning, and other software experiments" />
+    <meta name="twitter:url" content="/" />
+    <meta name="twitter:image:src" content="/assets/images/cover1.jpg" />
+    <script type="application/ld+json">
+      {
+          "@context": "http://schema.org",
+          "@type": "Website",
+          "publisher": "Finding The Way Home",
+          "url": "/",
+          "image": "/assets/images/cover1.jpg",
+          "description": "A personal blog with a focus of data science, machine learning, and other software experiments"
+      }
+    </script>
+    <meta name="generator" content="Jekyll 3.0.0" />
+    <link rel="alternate" type="application/rss+xml" title="Anthony DeSouza" href="/feed.xml" />
+  </head>
+  <body class="home-template nav-closed">
+    <div class="nav">
+      <h3 class="nav-title">Menu</h3>
+      <a href="#" class="nav-close">
+        <span class="hidden">Close</span>
+      </a>
+      <ul>
+        <li class="nav-home " role="presentation"><a href="/">Home</a></li>
+        <li class="nav-about " role="presentation"><a href="/about">About</a></li>
+        <li class="nav-fables " role="presentation"><a href="/tag/fables">Fables</a></li>
+        <li class="nav-speeches " role="presentation"><a href="/tag/speeches">Speeches</a></li>
+        <li class="nav-fiction " role="presentation"><a href="/tag/fiction">Fiction</a></li>
+        <li class="nav-author " role="presentation"><a href="/author/casper">Author</a></li>
+      </ul>
+      <a class="subscribe-button icon-feed" href="/feed.xml">Subscribe</a>
+    </div>
+    <span class="nav-cover"></span>
+    <div class="site-wrapper">
+      <!-- [[! Everything else gets inserted here ]] -->
+      <!-- < default -->
+      <!-- The comment above "< default" means - insert everything in this file into -->
+      <!-- the [body] of the default.hbs template, which contains our header/footer. -->
+      <!-- Everything inside the #post tags pulls data from the post -->
+      <!-- #post -->
+      <header class="main-header post-head no-cover">
+        <nav class="main-nav  clearfix">
+        </nav>
+      </header>
+      <main class="content" role="main">
+        <article class="">
+          <header class="post-header">
+            <h1 class="post-title">Pentax Firmware Decrypting in the Web</h1>
+            <section class="post-meta">
+              Anthony DeSouza
+              <time class="post-date" datetime="2015-01-09">09 Jan 2015</time>
+              <!-- [[tags prefix=" on "]] -->
+              on 
+              <a href='/tag/hacking'>Hacking</a>,
+              <a href='/tag/webapps'>Webapps</a>
+            </section>
+          </header>
+          <section class="post-content">
+            <p>A couple of years ago, I purchased my first DSLR: the Pentax K-30. Photography has been my hobby ever since, and I’m always looking for cool new things to push my camera further. The one thing that I really miss from my previous Canon point-and-shoot is unsurprisingly, the <a href="http://chdk.wikia.com/wiki/CHDK">Canon Hack Development Kit (CHDK)</a>. Luckily, most of the features that make it so useful, such as RAW image capture, live histogram, and the intervalometer are already present in the K-30. I’m not missing out on much.</p>
+            <p>But I can’t resist the urge to fantasize over a programmable DSLR. So when <em>Pentax Forums</em> user <em>Shodan</em> announced he had started working on the <a href="http://www.pentaxforums.com/forums/6-pentax-dslr-discussion/250555-resurrecting-pentax-firmware-hacking.html"><em><strong>Pentax</strong> Hack Development Kit (PHDK)</em></a>, I knew I had to be a part of it.</p>
+            <p>The first step to hacking the firmware is decrypting it. <em>Svenpeter</em> made a tool called <a href="http://github.com/svenpeter42/pfwtool">pfwtool</a> which does an excellent job of decrypting the firmware. However, I was curious as to seeing if that functionality could be done via HTML5. My favourite file host, <a href="http://mega.co.nz">MEGA</a> uses JavaScript for on-the-fly decryption, so why couldn’t I? As it turns out, it was a lot easier than I thought it would be.</p>
+            <p>The web app is based off of svenpeter’s awesome code. I ported it all to JavaScript and built a simple GUI that let me leverage the new file API in HTML5 to decrypt the file and spit it back out <strong>without</strong> uploading it. That’s right – everything happens client side. It’s really nifty and if you’re interested in seeing how it works, feel free to examine the <a href="http://github.com/MooseV2/pfwtool_html">GitHub</a> repository.</p>
+            <p>Follow these simple steps to give it a try:</p>
+            <ol>
+              <li><a href="http://www.ricoh-imaging.co.jp/english/support/digital/firmware/k30v105.zip">Download</a> the Pentax K-30 firmware (v 1.05) from Ricoh-Imaging.</li>
+              <li>Open the <a href="/projects/pfwtool_html">Pentax Firmware Decrypter</a> in Google Chrome. Other browsers may have problems.</li>
+              <li>Drag the firmware file named <strong>fwdc215b.bin</strong> into the web page.</li>
+              <li>In a couple seconds, you will have a file appear in your downloads folder named <strong>decrypted-fwdc215b.bin</strong>.</li>
+              <li>Verify that it has the md5 checksum of <strong>0afe2524251009b97639316edfe1c410</strong>.</li>
+            </ol>
+            <p><strong>That’s it! Have fun with the PHDK</strong></p>
+          </section>
+          <footer class="post-footer">
+            <!-- Everything inside the #author tags pulls data from the author -->
+            <!-- #author-->
+            <section class="author">
+              <h4><a href="/author/">Anthony DeSouza</a></h4>
+              <p> Studying software engineering, I have an interest in machine learning, data science, and the application of technology to improve life.</p>
+              <div class="author-meta">
+                <span class="author-location icon-location"> Ontario, Canada</span>
+                <span class="author-link icon-link"><a href="https://desouza.li"> desouza.li</a></span>
+              </div>
+            </section>
+            <!-- /author  -->
+            <section class="share">
+              <h4>Share this post</h4>
+              <a class="icon-twitter" href="http://twitter.com/share?text=Pentax Firmware Decrypting in the Web&amp;url=https://desouza.lipfwtool_html"
+                    onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                <span class="hidden">Twitter</span>
+              </a>
+              <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=https://desouza.lipfwtool_html"
+                    onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                <span class="hidden">Facebook</span>
+              </a>
+              <a class="icon-google-plus" href="https://plus.google.com/share?url=https://desouza.lipfwtool_html"
+                   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                <span class="hidden">Google+</span>
+              </a>
+            </section>
+            <!-- Add Disqus Comments -->
+          </footer>
+        </article>
+      </main>
+      <aside class="read-next">
+        <!-- [[! next_post ]] -->
+        <a class="read-next-story no-cover" href="/jekyll-minify-on-shared-hosting">
+          <section class="post">
+            <h2>Minifying Jekyll Content on a Shared Host</h2>
+            <p>I love [Jekyll](http://jekyllrb.com/). It makes it super simple for me to create the content for...</p>
+          </section>
+        </a>
+        <!-- [[! /next_post ]] -->
+        <!-- [[! prev_post ]] -->
+        <!-- [[! /prev_post ]] -->
+      </aside>
+      <!-- /post -->
+      <footer class="site-footer clearfix">
+        <section class="copyright"><a href="/">Anthony DeSouza</a> &copy; 2017</section>
+        <section class="poweredby">Proudly published with <a href="https://jekyllrb.com/">Jekyll</a> using <a href="https://github.com/biomadeira/jasper">Jasper</a></section>
+      </footer>
+    </div>
+    <!-- [[! Ghost outputs important scripts and data with this tag ]] -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <!-- [[! The main JavaScript file for Casper ]] -->
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+    <script type="text/javascript" src="/assets/js/index.js"></script>
+    <!-- Add Google Analytics  -->
+    <!-- Google Analytics Tracking code -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+      ga('create', 'UA-100869751-2', 'auto');
+      ga('send', 'pageview');
+    </script>
+  </body>
+</html>

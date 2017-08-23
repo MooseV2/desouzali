@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>desouza.li</title>
+      <link>https://desouza.li</link>
+    <description>A personal blog with a focus of data science, machine learning, and other software experiments</description>
+    <language>en-us</language>
+    <managingEditor> Anthony DeSouza</managingEditor>
+    <atom:link href="rss" rel="self" type="application/rss+xml" />
+      <item>
+        <title>Minifying Jekyll Content on a Shared Host</title>
+        <link>//jekyll-minify-on-shared-hosting</link>
+      <author>Anthony DeSouza</author>
+      <pubDate>2015-03-23T11:00:00-04:00</pubDate>
+      <guid>//jekyll-minify-on-shared-hosting</guid>
+      <description><![CDATA[
+	     <p>I love <a href="http://jekyllrb.com/">Jekyll</a>. It makes it super simple for me to create the content for this site. All I have to do is open up a text file and start typing. When I’m done, it’s just a simple <code class="highlighter-rouge">git push</code> away from the web where it’s formatted and compiled into static files.</p>
+      <p>The biggest reason why I love Jekyll is the pure minimalism factor. I can’t stand bloat. Loading up a page and seeing the network requests in the hundreds and the page size in the megabytes sends shivers down my spines. When I’m coding, I write things as efficiently and legibly as possible whenever I can, and always spend time refactoring my code until I’m pleased.</p>
+      <p>So when it comes to my place on the web, I’m not going to make an exception. Now, when it comes to web content, I’m left with an interesting dillema. I can do one of two things:</p>
+      <ol>
+        <li>Make the code very legible with whitespace, or</li>
+        <li>Make the code very small by ‘minifying’ it.</li>
+      </ol>
+      <p>Well, after a lot of thinking, I decided to go with the latter. My thinking is that any half-decent web browser will already pretty-print the code when viewing the source, and barring that, someone could easily throw it into one of many <a href="http://jsbeautifier.org/">beautifiers</a> available anyway. In this case, the bytes are more important.</p>
+      <p>The next step was to figure out how to minify the code automatically. Initially, I looked a plugin: a simple Ruby file that’s dragged into the plugin directory and changes the way Jekyll behaves. As it turns out, <strong>Stereobooster</strong> has already made <a href="https://github.com/stereobooster/jekyll-press">jekyll-press</a> to do just that. Unfortunately, it has some dependencies that I just couldn’t install on a shared host.</p>
+      <p>So like any other logical programmer, instead of settling for less, I wrote my own.</p>
+      <p>The dependencies of my script can all be installed in the userspace without the need of gcc or other compilers. To get started (assuming you have Python Pip), simply run the following code:</p>
+      <div class="highlighter-rouge">
+        <pre class="highlight"><code>pip install --user htmlmin
+pip install --user slimit
+pip install --user csscompressor
+</code></pre>
+      </div>
+      <p>This will install them all to the home directory.</p>
+      <p>Next, create a file named <code class="highlighter-rouge">_tidy.py</code> with the following content:</p>
+      <figure class="highlight">
+        <pre><code class="language-python" data-lang="python"><span class="c"># -*- coding: utf-8 -*-</span>
+<span class="s">"""
+_tidy: Reformats and minifies HTML, JS, and CSS
+_tidy [directory_in] [directory_out]
+
+Requires:
+- slimmer
+- slimit
+- csscompressor
+To install on shared hosting, use `pip install --user &lt;package&gt;`
+
+"""</span>
+<span class="c">#from htmlmin import minify as html_minify</span>
+<span class="kn">from</span> <span class="nn">slimmer</span> <span class="kn">import</span> <span class="n">css_slimmer</span> <span class="k">as</span> <span class="n">css_minify</span>
+<span class="kn">from</span> <span class="nn">slimmer</span> <span class="kn">import</span> <span class="n">html_slimmer</span> <span class="k">as</span> <span class="n">html_minify</span>
+<span class="kn">from</span> <span class="nn">slimit</span> <span class="kn">import</span> <span class="n">minify</span> <span class="k">as</span> <span class="n">js_minify</span>
+<span class="c">#from csscompressor import compress as css_minify</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="nb">reload</span><span class="p">(</span><span class="n">sys</span><span class="p">)</span> <span class="c"># Python deletes setdefaultencoding, so get it back</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">setdefaultencoding</span><span class="p">(</span><span class="s">'utf8'</span><span class="p">)</span> <span class="c"># Otherwise, htmlmin will use ascii encoding</span>
+
+<span class="n">input_dir</span> <span class="o">=</span> <span class="s">u'./_site'</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">1</span> <span class="k">else</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">output_dir</span> <span class="o">=</span> <span class="s">u'./_minify'</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">&lt;=</span><span class="mi">2</span> <span class="k">else</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">valid_extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s">'.html'</span><span class="p">,</span> <span class="s">'.js'</span><span class="p">,</span> <span class="s">'.css'</span><span class="p">]</span>
+<span class="n">file_counts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">valid_extensions</span><span class="p">)</span>
+<span class="n">compression</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">'.html'</span> <span class="p">:</span> <span class="k">lambda</span> <span class="n">content</span><span class="p">:</span> <span class="n">html_minify</span><span class="p">(</span><span class="n">content</span><span class="p">),</span>
+    <span class="s">'.js'</span>   <span class="p">:</span> <span class="k">lambda</span> <span class="n">content</span><span class="p">:</span> <span class="n">js_minify</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">mangle</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+    <span class="s">'.css'</span>  <span class="p">:</span> <span class="k">lambda</span> <span class="n">content</span><span class="p">:</span> <span class="n">css_minify</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">input_dir</span><span class="p">):</span>
+    <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">file_in</span>  <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="nb">file</span><span class="p">)</span>
+        <span class="n">file_out</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">file_in</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">input_dir</span><span class="p">))</span>
+        <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="nb">file</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">valid_extensions</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_in</span><span class="p">,</span> <span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_in</span><span class="p">:</span>
+                <span class="n">contents</span> <span class="o">=</span> <span class="n">f_in</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_out</span><span class="p">))</span>
+            <span class="k">except</span> <span class="nb">Exception</span><span class="p">:</span> <span class="c"># If the directory already exists</span>
+                 <span class="k">pass</span>
+            
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">minified</span> <span class="o">=</span> <span class="n">compression</span><span class="p">[</span><span class="n">extension</span><span class="p">](</span><span class="n">contents</span><span class="p">)</span>
+            <span class="k">except</span> <span class="nb">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">"Error parsing '</span><span class="si">%</span><span class="s">s' file '</span><span class="si">%</span><span class="s">s'"</span> <span class="o">%</span> <span class="p">(</span><span class="n">extension</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="nb">file</span><span class="p">)</span>
+                <span class="k">print</span> <span class="s">"&gt;&gt;&gt;</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="n">e</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_out</span><span class="p">,</span> <span class="s">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_out</span><span class="p">:</span>
+                    <span class="n">file_counts</span><span class="p">[</span><span class="n">valid_extensions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">extension</span><span class="p">)]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">f_out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">minified</span><span class="p">)</span>
+
+
+<span class="k">print</span> <span class="s">"Compressed </span><span class="si">%</span><span class="s">s file(s)"</span> <span class="o">%</span> <span class="nb">sum</span><span class="p">(</span><span class="n">file_counts</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">extension</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">file_counts</span><span class="p">):</span>
+    <span class="k">print</span> <span class="s">"-&gt; </span><span class="si">%</span><span class="s">s: </span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">valid_extensions</span><span class="p">[</span><span class="n">extension</span><span class="p">],</span> <span class="n">count</span><span class="p">)</span></code></pre>
+      </figure>
+      <p>Run it with <code class="highlighter-rouge">python _tidy.py in_dir out_dir</code>, or in my case, <code class="highlighter-rouge">python _tidy.py $JEKYLL_TMP/build.raw $/JEKYLL_TMP/build.min</code></p>
+      <p>Good luck!!</p>
+      ]]></description>
+  </item>
+</channel>
+</rss>
