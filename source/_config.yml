@@ -22,7 +22,7 @@ short_url: 'desouza.li'
 google_analytics: UA-100869751-2
 disqus: desouza
 # edit baseurl to simply '/' if using as your personal page (instead of a project page)
-baseurl: /desouzali
+baseurl: /desouzali/
 
 # Permalinks
 permalink: /:title

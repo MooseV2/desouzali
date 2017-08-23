@@ -9,10 +9,10 @@
     <atom:link href="rss" rel="self" type="application/rss+xml" />
       <item>
         <title>Minifying Jekyll Content on a Shared Host</title>
-        <link>/desouzali/jekyll-minify-on-shared-hosting</link>
+        <link>/desouzali//jekyll-minify-on-shared-hosting</link>
       <author>Anthony DeSouza</author>
       <pubDate>2015-03-23T11:00:00-04:00</pubDate>
-      <guid>/desouzali/jekyll-minify-on-shared-hosting</guid>
+      <guid>/desouzali//jekyll-minify-on-shared-hosting</guid>
       <description><![CDATA[
 	     <p>I love <a href="http://jekyllrb.com/">Jekyll</a>. It makes it super simple for me to create the content for this site. All I have to do is open up a text file and start typing. When I’m done, it’s just a simple <code class="highlighter-rouge">git push</code> away from the web where it’s formatted and compiled into static files.</p>
       <p>The biggest reason why I love Jekyll is the pure minimalism factor. I can’t stand bloat. Loading up a page and seeing the network requests in the hundreds and the page size in the megabytes sends shivers down my spines. When I’m coding, I write things as efficiently and legibly as possible whenever I can, and always spend time refactoring my code until I’m pleased.</p>

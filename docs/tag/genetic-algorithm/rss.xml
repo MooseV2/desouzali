@@ -9,10 +9,10 @@
     <atom:link href="rss" rel="self" type="application/rss+xml" />
       <item>
         <title>Optimization Using Genetic Algorithms</title>
-        <link>/desouzali/genetic-algorithms</link>
+        <link>/desouzali//genetic-algorithms</link>
       <author>Anthony DeSouza</author>
       <pubDate>2017-06-29T04:30:00-04:00</pubDate>
-      <guid>/desouzali/genetic-algorithms</guid>
+      <guid>/desouzali//genetic-algorithms</guid>
       <description><![CDATA[
 	     <p>Whether it’s minimizing manufacturing costs, finding the <a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem">shortest path around a city</a>, or finding an optimal airfoil design, optimization problems are everywhere. An <strong>optimization problem</strong>, simply put, is the problem of finding the <em>best</em> solution from all feasible solutions.</p>
       <p>But how would you determine the best solution? <em>That</em> is the million dollar question. Suppose you were tasked with creating a box to hold liquid. The requirements state that the <strong>area</strong> must be at least <strong>16m<sup>2</sup></strong> and every meter of material used in the <strong>perimeter</strong> costs <strong>$2.00</strong>. What’s the cheapest box you can build?</p>
