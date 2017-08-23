@@ -107,7 +107,7 @@ It turns out that life on Earth is incredibly complex. *Trillions* of living cel
 Not every living creature makes the cut. Some are killed early -- by hunting, disease, or starvation. Some just can't find a suitable partner. If you're an African impala and constantly being hunted by carnivourous predators, there's no guarantee that you'll live long enough to ensure your spot in the gene pool.
 
 
-<img src="/assets/images/impala.jpg" alt="An impala grazing in a field" style="width: 110%;">
+<img src="{{ site.baseurl }}assets/images/impala.jpg" alt="An impala grazing in a field" style="width: 110%;">
 
 But if you *did* have to outrun a lion, might your odds be *slightly* more favourable if you could run just a *little* bit faster, jump a *little* bit higher, and see a *little* bit farther? Over time, the less fortunate impalas would be killed off, leaving the faster impalas to reproduce and pass on their "code".
 
