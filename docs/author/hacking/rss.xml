@@ -9,10 +9,10 @@
     <atom:link href="rss" rel="self" type="application/rss+xml" />
       <item>
         <title>Pentax Firmware Decrypting in the Web</title>
-        <link>/desouzali//pfwtool_html</link>
+        <link>//pfwtool_html</link>
       <author>Anthony DeSouza</author>
       <pubDate>2015-01-09T18:40:00-05:00</pubDate>
-      <guid>/desouzali//pfwtool_html</guid>
+      <guid>//pfwtool_html</guid>
       <description><![CDATA[
 	     <p>A couple of years ago, I purchased my first DSLR: the Pentax K-30. Photography has been my hobby ever since, and I’m always looking for cool new things to push my camera further. The one thing that I really miss from my previous Canon point-and-shoot is unsurprisingly, the <a href="http://chdk.wikia.com/wiki/CHDK">Canon Hack Development Kit (CHDK)</a>. Luckily, most of the features that make it so useful, such as RAW image capture, live histogram, and the intervalometer are already present in the K-30. I’m not missing out on much.</p>
       <p>But I can’t resist the urge to fantasize over a programmable DSLR. So when <em>Pentax Forums</em> user <em>Shodan</em> announced he had started working on the <a href="http://www.pentaxforums.com/forums/6-pentax-dslr-discussion/250555-resurrecting-pentax-firmware-hacking.html"><em><strong>Pentax</strong> Hack Development Kit (PHDK)</em></a>, I knew I had to be a part of it.</p>

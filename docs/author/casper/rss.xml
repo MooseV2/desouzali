@@ -9,10 +9,10 @@
     <atom:link href="rss" rel="self" type="application/rss+xml" />
       <item>
         <title>Optimization Using Genetic Algorithms</title>
-        <link>/desouzali//genetic-algorithms</link>
+        <link>//genetic-algorithms</link>
       <author>Anthony DeSouza</author>
       <pubDate>2017-06-29T04:30:00-04:00</pubDate>
-      <guid>/desouzali//genetic-algorithms</guid>
+      <guid>//genetic-algorithms</guid>
       <description><![CDATA[
 	     <p>Whether it’s minimizing manufacturing costs, finding the <a href="https://en.wikipedia.org/wiki/Travelling_salesman_problem">shortest path around a city</a>, or finding an optimal airfoil design, optimization problems are everywhere. An <strong>optimization problem</strong>, simply put, is the problem of finding the <em>best</em> solution from all feasible solutions.</p>
       <p>But how would you determine the best solution? <em>That</em> is the million dollar question. Suppose you were tasked with creating a box to hold liquid. The requirements state that the <strong>area</strong> must be at least <strong>16m<sup>2</sup></strong> and every meter of material used in the <strong>perimeter</strong> costs <strong>$2.00</strong>. What’s the cheapest box you can build?</p>
@@ -97,7 +97,7 @@
       <h2 id="enter-genetics">Enter Genetics</h2>
       <p>It turns out that life on Earth is incredibly complex. <em>Trillions</em> of living cells interact every day to make up the body known as <em>you</em>. From a strictly biological point of view, life is a game where the objective is to stay on Earth as long as possible. The cells in your body can’t keep this up forever, so the only possible way to prevent your own extinction is by duplicating the important parts of your own existence and making … a <em>new</em> version of you. This, of course, is called <em>reproduction</em>.</p>
       <p>Not every living creature makes the cut. Some are killed early – by hunting, disease, or starvation. Some just can’t find a suitable partner. If you’re an African impala and constantly being hunted by carnivourous predators, there’s no guarantee that you’ll live long enough to ensure your spot in the gene pool.</p>
-      <p><img src="/desouzali/assets/images/impala.jpg" alt="An impala grazing in a field" style="width: 110%;" /></p>
+      <p><img src="/assets/images/impala.jpg" alt="An impala grazing in a field" style="width: 110%;" /></p>
       <p>But if you <em>did</em> have to outrun a lion, might your odds be <em>slightly</em> more favourable if you could run just a <em>little</em> bit faster, jump a <em>little</em> bit higher, and see a <em>little</em> bit farther? Over time, the less fortunate impalas would be killed off, leaving the faster impalas to reproduce and pass on their “code”.</p>
       <p>This “code” is found in every living organism in a special chemical called DNA, and among other things is responsible for tweaking the aforementioned variables.</p>
       <p>Unlike computer code, a scientist looking at DNA would see a string of millions (or billions) of “bases” in the form of <strong>A</strong>, <strong>C</strong>, <strong>G</strong>, and <strong>T</strong>, representing the fundamental base chemicals of DNA. The code is divided into discrete sections called <strong>chromosomes</strong>, with two chromosomes forming a double-helix pair. Each chromosome affects the organism differently. For example, in humans (who have 23 pairs of chromosomes), the 23rd pair determines gender. Let’s look at what a chromosome may look like:</p>
